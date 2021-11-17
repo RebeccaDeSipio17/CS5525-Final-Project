@@ -1,0 +1,181 @@
+---
+title: "CS5525 Homework 1"
+author: "Rebecca DeSipio"
+date: "9/6/2021"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+---
+# Solutions
+Due Date: 9/10/2021
+
+## Exercise 1
+**Question**: Which of the following ways will be fastest/slowest to compute the square root of a vector? Use microbenchmarking to test your answers. 
+
+```{r eval=FALSE}
+sqrt(x)
+x^(0.5)
+x^(1/2)
+exp(log(x)/2)
+```
+
+**Answer**: `sqrt(x)` will run the fastest since it has the smallest computational complexity since it directly computes the square root. `exp(log(x)/2)` will run the slowest since it has the greatest computational complexity with 3 total operations. First is the `log(x)`, then divide by two, and finally raise that value to the $e$. `x^(0.5)` will be the second fastest with one operation (the exponent), and `x^(1/2)` will be second slowest with two total operations (divide 1 by 2 and then raise that quantity to the exponent).
+
+The above can be confirmed via the following code:
+
+```{r}
+# Microbenchmark measures the time that it takes to evalute an expression
+library("microbenchmark") 
+
+x <- runif(100, min=0.1, max=10)  # random vector with size 
+
+microbenchmark(
+  sqrt(x),
+  x^(0.5),
+  x^(1/2),
+  exp(log(x)/2)
+)
+```
+
+References:
+
+* [Using the microbenchmark package to compare the execution time of R expressions](https://www.r-bloggers.com/2015/01/using-the-microbenchmark-package-to-compare-the-execution-time-of-r-expressions/)
+
+* [The Continuous Uniform Distribution in R](https://www.geo.fu-berlin.de/en/v/soga/Basics-of-statistics/Continous-Random-Variables/Continuous-Uniform-Distribution/Continuous-Uniform-Distribution-in-R/index.html#:~:text=The%20runif()%20function%20generates,min%20and%20the%20max%20argument.)
+
+## Exercise 2
+**Question:** the vector `x = c(3,4,12,19,23,48,50,61,63,78)`, write out the R code necessary to print only the values of x that are not prime. The code should use nested loops to iterate through the vector of primes and x. 
+
+Note: list of primes between 2 and 100:
+
+\center
+$$
+2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97
+$$
+\center
+```{r}
+# List of prime numbers from 2 to 100
+primes <- c(2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97)
+
+# find which values within x are prime numbers
+x <- c(3,4,12,19,23,48,50,61,63,78)
+
+x_not_prime <- c() # define array to store values of x that are prime
+isPrime <- 0
+
+# use a for loop to compare elements and store those that are prime in x_primes
+for (ii in x){
+  for (jj in primes) {
+    if (ii == jj){
+      isPrime = 1
+      break
+    }
+  }
+  if (isPrime == 0){
+    x_not_prime <- append(x_not_prime, ii)
+  }
+  isPrime = 0
+}
+
+cat("Values of x that are not prime numbers: ",x_not_prime)
+```
+
+## Exercise 3
+**Question:** Using ```dyplr``` with the ```gapminder``` data set accomplish the following:
+
+i. Find observations where life expectancy is less than 29
+ii.  Find observations from Rwanda after the year 1979
+iii.  Use select() to subset the data : select the year and lifeExp columns
+iv. Get the year and lifeExp variables for Cambodia and Afghanistan
+v. Create a scatter plot that examines the relation between life expectancy and GDP per capita
+vi. Modify the above scatterplot of GDP per capita vs. life expectancy, dividing into facets by continent (use ```facet_grid``` or ```facet_wrap``` for this)
+
+**Answer:**
+```{r} 
+library(dplyr, warn.conflicts = FALSE)
+library(gapminder)
+library(ggplot2)
+
+gapminder 
+
+# Part (i) - find observations where life expectancy  is less than 29
+# --- Use the filter function
+lifeExp_LT29 <- filter(gapminder, lifeExp < 29) # lifeExp Less Than 29 years old
+lifeExp_LT29
+
+# Part (ii) -  find observations from Rwanda after the year 1979
+# --- Use the filter function
+Rwanda_after1979 <- filter(gapminder, (country=="Rwanda")& (year>1979))
+Rwanda_after1979
+
+# Part (iii) - use select() to subset the data : select the year and lifeExp columns
+year_and_LifeExp <- select(gapminder, year, lifeExp)
+year_and_LifeExp
+
+# Part (iv) - get the year and lifeExp variables for Cambodia and Afghanistan
+CA_filtering = select(filter(gapminder, country=="Cambodia" | country=="Afghanistan"),
+                     year, lifeExp, country)
+# --- Alternative way of doing it... take the year_and_LifeExp variable and then filter
+#     that by Cambodia and Afghanistan
+CA_filtering
+
+# Part (v) - create a scatter plot that examines the relation between life expectancy and GDP per capita
+scatterPlot <- ggplot(gapminder) + 
+  geom_point(aes(x = lifeExp, y= gdpPercap, color = continent))
+scatterPlot
+
+# part (vi) - Modify the above scatter plot of GDP per capita vs. life expectancy, 
+#             dividing into facets by continent
+scatterPlot + facet_wrap(. ~continent)
+```
+
+References:
+
+* [facet_wrap in ggplot2](https://plotly.com/ggplot2/facet_wrap/)
+
+## Bonus
+Use ```summarize()``` and ```summarize_at()```
+
+**Question**: Functions within summarize include classical statistical summaries, like mean(), median(), var(), sd(), mad(), IQR(), and max(). Remember they are functions that take n inputs and distill them down into 1 output. 
+
+Looking at the gapminder data set, complete the following: 
+
+i. Compute the average life expectancy by continent 
+ii. Compute average and median life expectancy and GDP per capita by continent by year, only for 1952 and 2007
+iii. Focus on Asia. What are the minimum and maximum life expectancies seen by year?
+
+**Answer:**
+```{r}
+# part (i) - compute average life expectancy by continent
+gapminder.g <- group_by(gapminder, continent)
+avg_lifeExp <- summarize(gapminder.g, mean(lifeExp)) 
+avg_lifeExp
+
+# part (ii) - compute the average and median life expectancy and GDP per capita by continent by year
+#             but only for 1952 and 2007
+
+## Start by grouping the continents by the years 1952 and 2007
+year_grouping <- group_by(filter(gapminder,(year==1952 | year==2007)),continent,year)
+year_grouping
+
+## Then compute the median and mean lifeExp and gdpPercap by continent using the 
+#  summarize() function
+mean_median <- year_grouping %>%
+  summarize(avg_lifeExp=mean(lifeExp), median_lifeExp=median(lifeExp), 
+            avg_gdpPerCap=mean(gdpPercap), median_gdpPercap=median(gdpPercap))
+
+mean_median
+
+# part (iii) - for Asia, what are the min and max lifeExp seen by year?
+asiaOnly <- group_by(filter(gapminder, continent=="Asia"), year)
+
+MinMax_lifeExp <- asiaOnly %>% summarize(min(lifeExp), max(lifeExp))
+MinMax_lifeExp
+```
+
+References:
+
+* [Summarise multiple columns](https://dplyr.tidyverse.org/reference/summarise_all.html)
+
