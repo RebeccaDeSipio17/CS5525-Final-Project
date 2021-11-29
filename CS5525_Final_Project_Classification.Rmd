@@ -1,0 +1,18 @@
+---
+title: "CS5525 Homework 1"
+author: "Jennifer Appiah-Kubi, Rebecca DeSipio, Ajinkya Fotedar"
+date: "9/6/2021"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+---
+
+# Introductoin
+
+# Classification Methods
+
+# Analysis
+
+# Conclusion
