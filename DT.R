@@ -2,7 +2,9 @@
 # Using the heart.csv data set
 # Here, the target column indicates whether a person has heart disease or not
 
-setwd("C:/Users/Francis/OneDrive/PhD/Data Analytics I/Final Project")
+# setwd("C:/Users/Francis/OneDrive/PhD/Data Analytics I/Final Project")
+
+setwd("/Users/ajinkyafotedar/CS5525/Project/CS5525-Final-Project")
 set.seed(2441139)
 library(tree)
 
