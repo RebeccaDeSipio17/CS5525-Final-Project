@@ -96,7 +96,8 @@ dim(X.test)
 library(glmnet)
 
 # lasso model
-lasso.mod <- glmnet(X.train, y.train, alpha = 1, lambda = grid)
+lasso.mod <- glmnet(X.train, y.train, alpha = 1, lambda = grid, 
+                    family = "binomial")
 plot(lasso.mod, xvar = "lambda", label = T)
 
 # cross-validation for lambda
@@ -114,7 +115,8 @@ lasso.coef <- lasso.coef[which(lasso.coef != 0)]
 lasso.coef
 
 # coefficients of the best model
-best.lasso.mod <- glmnet(X.train, y.train, alpha = 1, lambda = bestlam)
+best.lasso.mod <- glmnet(X.train, y.train, alpha = 1, lambda = bestlam, 
+                         family = "binomial")
 coef(best.lasso.mod)
 ```
 
@@ -122,7 +124,8 @@ coef(best.lasso.mod)
 
 ```{r message=FALSE, warning=FALSE}
 # elastic net model
-en.mod <- glmnet(X.train, y.train, alpha = 0.5, lambda = grid)
+en.mod <- glmnet(X.train, y.train, alpha = 0.5, lambda = grid, 
+                 family = "binomial")
 plot(en.mod, xvar = "lambda", label = T)
 
 # cross-validation for lambda (with a fixed alpha)
@@ -140,7 +143,8 @@ en.coef <- en.coef[which(en.coef != 0)]
 en.coef
 
 # coefficients of the best model
-best.en.mod <- glmnet(X.train, y.train, alpha = 0.5, lambda = bestlam)
+best.en.mod <- glmnet(X.train, y.train, alpha = 0.5, lambda = bestlam,
+                      family = "binomial")
 coef(best.en.mod)
 ```
 
