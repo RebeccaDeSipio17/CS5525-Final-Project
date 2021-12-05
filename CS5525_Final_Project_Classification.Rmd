@@ -11,23 +11,25 @@ output:
 
 # Introduction
 
-- In this project, we will be trying to predict the probability of having a heart attack using 14 variables available in the `hearts.csv` data-set. 
+- In this project, we will be trying to predict the probability of having a heart attack using 14 variables available in the `hearts.csv` data-set.
 
-- Techniques employed for model fit, analysis and interpretation, and visualization:
-    
-    - Classification
-    
-        1. Logistic Regression
-        2. Decision trees
-        3. Support Vector Machines
+- Classification techniques employed for model fit, analysis, interpretation, and visualization:
+
+    1. Penalized Logistic Regression
         
-    - Sparse Regression
+        - LASSO
+        - Elastic Net
+            
+    2. Decision trees
     
-        1. LASSO
-        2. Elastic Net 
+        - Random Forest
+        - Bootstrapping
+        
+    3. Support Vector Machines
+    4. KNN
 
 - Libraries used:
-  
+
     1. `glmnet`
     2. `tree`
     3. `randomForest`
@@ -67,16 +69,15 @@ names(heart)
 
 ```{r message=FALSE, warning=FALSE}
 set.seed(123)
-grid = 10^seq(10, -2, length = 100)
 
-X <- data.matrix(heart[, c("age", "sex", "cp", "trestbps", "chol", "fbs", 
+X <- as.matrix(heart[, c("age", "sex", "cp", "trestbps", "chol", "fbs",
                            "restecg", "thalach", "exang", "oldpeak", "slope",
                            "ca", "thal")
                        ]
                  )
 y <- heart$target
 
-n = nrow(X)
+n <- nrow(X)
 train_rows <- sample(1:n, n * 0.7)
 
 X.train <- X[train_rows,]
@@ -88,84 +89,77 @@ dim(X.train)
 dim(X.test)
 ```
 
-# Sparse Regression Methods
+# Classification Methods
 
-## Lasso
+## 1. Penalized Logistic Regression
+
+### 1.1 Lasso
 
 ```{r message=FALSE, warning=FALSE}
 library(glmnet)
 
+grid <- 10^seq(10, -2, length = 100)
+
 # lasso model
-lasso.mod <- glmnet(X.train, y.train, alpha = 1, lambda = grid)
+lasso.mod <- glmnet(X.train, as.factor(y.train), alpha = 1, lambda = grid,
+                    family = "binomial")
 plot(lasso.mod, xvar = "lambda", label = T)
 
 # cross-validation for lambda
-cv.out <- cv.glmnet(X.train, y.train, alpha = 1)
+cv.out <- cv.glmnet(X.train, as.factor(y.train), family = "binomial", alpha = 1, 
+                    type.measure = "class")
 bestlam <- cv.out$lambda.min
+bestlam
+
+# coefficients of the best model
+best.lasso.mod <- glmnet(X.train, as.factor(y.train), alpha = 1, lambda = bestlam,
+                         family = "binomial")
+coef(best.lasso.mod)
 
 # test error
-lasso.pred <- predict(lasso.mod, s = bestlam, newx = X.test)
+lasso.pred <- predict(best.lasso.mod, newx = X.test, s = bestlam)
 lasso.mse <- mean((lasso.pred - y.test)^2)
 lasso.mse
 
 # non-zero coefficients
-lasso.coef <- predict(lasso.mod, type = "coefficients", s = bestlam)
+lasso.coef <- predict(best.lasso.mod, type = "coefficients", s = bestlam)
 lasso.coef <- lasso.coef[which(lasso.coef != 0)]
 lasso.coef
-
-# coefficients of the best model
-best.lasso.mod <- glmnet(X.train, y.train, alpha = 1, lambda = bestlam)
-coef(best.lasso.mod)
 ```
 
-## Elastic Net
+### 1.2 Elastic Net
 
 ```{r message=FALSE, warning=FALSE}
 # elastic net model
-en.mod <- glmnet(X.train, y.train, alpha = 0.5, lambda = grid)
+en.mod <- glmnet(X.train, as.factor(y.train), alpha = 0.5, lambda = grid,
+                 family = "binomial")
 plot(en.mod, xvar = "lambda", label = T)
 
 # cross-validation for lambda (with a fixed alpha)
 cv.out <- cv.glmnet(X.train, y.train, alpha = 0.5)
 bestlam <- cv.out$lambda.min
 
+# coefficients of the best model
+best.en.mod <- glmnet(X.train, as.factor(y.train), alpha = 0.5, lambda = bestlam,
+                      family = "binomial")
+coef(best.en.mod)
+
 # test error
-en.pred <- predict(en.mod, s = bestlam, newx = X.test)
+en.pred <- predict(best.en.mod, s = bestlam, newx = X.test)
 en.mse <- mean((en.pred - y.test)^2)
 en.mse
 
 # non-zero coefficients
-en.coef <- predict(en.mod, type = "coefficients", s = bestlam)
+en.coef <- predict(best.en.mod, type = "coefficients", s = bestlam)
 en.coef <- en.coef[which(en.coef != 0)]
 en.coef
-
-# coefficients of the best model
-best.en.mod <- glmnet(X.train, y.train, alpha = 0.5, lambda = bestlam)
-coef(best.en.mod)
 ```
 
-# Classification Methods
+## 2. Decision Trees
 
-## Logistic Regression
+## 3. Support Vector Machines
 
-```{r}
-# splitting data
-target <- as.factor(heart$target)
-train <- sample(1:nrow(heart), 0.75 * nrow(heart))
-
-heart.train <- heart[train, ]
-heart.test <- heart[-train, ]
-
-# training data
-dim(heart.train)
-
-# testing data
-dim(heart.test)
-```
-
-## Decision Trees
-
-## Support Vector Machines
+## 4. KNN
 
 # Analysis
 
