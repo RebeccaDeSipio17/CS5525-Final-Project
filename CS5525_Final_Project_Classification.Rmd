@@ -39,7 +39,7 @@ output:
 
 ```{r}
 # reading data
-setwd("/Users/ajinkyafotedar/CS5525/Project/CS5525-Final-Project")
+#setwd("/Users/ajinkyafotedar/CS5525/Project/CS5525-Final-Project")
 heart <- read.csv("heart.csv")
 
 # observations
@@ -71,11 +71,9 @@ names(heart)
 ```{r message=FALSE, warning=FALSE}
 set.seed(123)
 
-X <- as.matrix(heart[, c("age", "sex", "cp", "trestbps", "chol", "fbs",
+X <- as.matrix(heart, c("age", "sex", "cp", "trestbps", "chol", "fbs",
                            "restecg", "thalach", "exang", "oldpeak", "slope",
-                           "ca", "thal")
-                       ]
-                 )
+                           "ca", "thal"))
 y <- heart$target
 
 n <- nrow(X)

@@ -70,6 +70,35 @@ rf.pred <- predict(rf.heart, heart.test, type='class')
 table(rf.pred, Target.test)
 varImpPlot(rf.heart)
 
+## Determine best model 
+# Here, we could investigate how mtry affect the accuracy
+Acc <- rep(0,ncol(heart)-2)
+for (m in 1:(ncol(heart)-2)){
+  set.seed(2441139)
+  rf.heart <- randomForest(as.factor(as.character(heart$target))~., data=heart, 
+                           subset=train, mtry=m, 
+                           ntree=25)
+  rf.pred <- predict(rf.heart, heart.test, type='class')
+  t <- table(rf.pred, Target.test)
+  acc <- sum(diag(t))/sum(t)
+  Acc[m] <- acc
+}
+mbest <- which(Acc==max(Acc))
+plot(1:(ncol(heart)-2), Acc, xlab='mtry', ylab='Accuracy of random forest')
+
+
+# Now use the best value of m for the random forest
+set.seed(2441139)
+rf.heart <- randomForest(as.factor(as.character(heart$target))~., data=heart, 
+                         subset=train, mtry=mbest, 
+                         ntree=25, importance=TRUE)
+rf.heart
+
+# Predict on the forest
+rf.pred <- predict(rf.heart, heart.test, type='class')
+table(rf.pred, Target.test)
+varImpPlot(rf.heart)
+
 
 
 ##########################################################
