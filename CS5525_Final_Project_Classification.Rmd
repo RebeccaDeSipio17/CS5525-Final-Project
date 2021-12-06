@@ -16,15 +16,15 @@ output:
 - Classification techniques employed for model fit, analysis, interpretation, and visualization:
 
     1. Penalized Logistic Regression
-        
+
         - LASSO
         - Elastic Net
-            
+
     2. Decision trees
-    
+
         - Random Forest
         - Bootstrapping
-        
+
     3. Support Vector Machines
     4. KNN
 
@@ -33,6 +33,7 @@ output:
     1. `glmnet`
     2. `tree`
     3. `randomForest`
+    4. `caret`
 
 ## Data-set
 
@@ -106,7 +107,7 @@ lasso.mod <- glmnet(X.train, as.factor(y.train), alpha = 1, lambda = grid,
 plot(lasso.mod, xvar = "lambda", label = T)
 
 # cross-validation for lambda
-cv.out <- cv.glmnet(X.train, as.factor(y.train), family = "binomial", alpha = 1, 
+cv.out <- cv.glmnet(X.train, as.factor(y.train), family = "binomial", alpha = 1,
                     type.measure = "class")
 bestlam <- cv.out$lambda.min
 bestlam
@@ -158,6 +159,57 @@ en.coef
 ## 2. Decision Trees
 
 ## 3. Support Vector Machines
+
+```{r message=FALSE, warning=FALSE}
+library(caret)
+
+set.seed(5525)
+
+# splitting data into test and train
+intrain <- createDataPartition(y = heart$target, p = 0.7, list = F)
+
+training <- heart[intrain,]
+testing <- heart[-intrain,]
+training[["target"]] <- as.factor(training[["target"]])
+
+dim(training)
+dim(testing)
+
+# model training with svm
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+svm.mod <- train(target ~ ., data = training, method = "svmLinear",
+                 trControl = trctrl,
+                 preProcess = c("center", "scale"),
+                 tuneLength = 10)
+svm.mod
+
+# predction using the above model
+svm.pred <- predict(svm.mod, newdata = testing)
+svm.pred
+
+# accuracy of the trained model
+confusionMatrix(table(svm.pred, testing$target))
+
+# costs for further tuning with 10-fold cross-validation
+grid <- expand.grid(C = c(0, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 5))
+
+svm.mod.grid <- train(target ~ ., data = training, method = "svmLinear",
+                      trControl = trctrl,
+                      preProcess = c("center", "scale"),
+                      tuneGrid = grid,
+                      tuneLength = 10)
+svm.mod.grid
+
+# accuracy plot of tuned model
+plot(svm.mod.grid)
+
+# prediction using tuned model
+svm.pred.grid <- predict(svm.mod.grid, newdata = testing)
+svm.pred.grid
+
+# accuracy of the tuned model
+confusionMatrix(table(svm.pred.grid, testing$target))
+```
 
 ## 4. KNN
 
