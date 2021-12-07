@@ -7,10 +7,8 @@ output:
     toc: yes
   html_document:
     toc: yes
-    
 ---
 
-    
 
 # I. Introduction
 
@@ -64,14 +62,43 @@ Finally, random forest was used to improve upon bagging and further improve pred
 
 ![The side-by-side plots show the variables of importance in heart attack predictability. The table in the top-right shows the prediction accuracy for random forest.](randomforest_plots.png){height=20%}
 
+\newpage
+
+## Support Vector Machines
+
+SVM is a supervised classification method that separates data using *hyperplanes*, which act as a decision boundary between the various classes. Here we use a classifier for predicting whether a patient is suffering from any heart disease or not. 
+
+### Model Training and Accuracy:
+
+We first train a linear classifier with the help of a *train control* method that uses *repeated cross-validation*, and then calculate prediction accuracy (82.2%) using a *confusion matrix*.
+
+```{r echo=FALSE, out.width="35%", out.height="35%", fig.align='center', fig.cap='Confusion Matrix with Cost = 1'}
+library(knitr)
+include_graphics("./confusion_matrix.png")
+```
+
+### Choosing Different Costs:
+
+In order to improve model performance, we play with *Cost (C)* values in our classifier. For this we define a grid with specific *C* values. We then train our model again using the new *C* values. Our prediction accuracy is the most (83.5%) when $C = 0.01$, reflected in the plot below.
+
+```{r echo=FALSE, out.width="50%", out.height="50%", fig.align='center', fig.cap='Accuracy Plot with Varying Costs'}
+include_graphics("./svm_accuracy_plot.png")
+```
+
+### Tuned Model:
+
+Finally, we test the model for the same *C* values. We do this by using *predict* over the *tuned* training model and the testing data-set, and checking the accuracy using the *confusion matrix*. We note that this ends up giving a higher accuracy rate (83.3%). 
+
+```{r echo=FALSE, out.width="35%", out.height="35%", fig.align='center', fig.cap='Confusion Matrix of the Tuned Model'}
+include_graphics("./confusion_matrix_tuned.png")
+```
+
 ## KNN
 
-
-## Support Vector Machines (SVM)
-
-
 ## Logistic Regression
+
 ### Lasso
+
 ### Elastic Net
 
 # III. Analysis
