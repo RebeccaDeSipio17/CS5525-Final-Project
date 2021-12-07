@@ -9,6 +9,10 @@ output:
     toc: yes
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
 # Introduction
 
 - In this project, we will be trying to predict the probability of having a heart attack using 14 variables available in the `hearts.csv` data-set.

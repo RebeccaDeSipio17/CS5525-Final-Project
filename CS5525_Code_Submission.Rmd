@@ -9,6 +9,10 @@ output:
     toc: yes
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
 # Classification Methods
 
 First set the directory (path which contains the `heart.csv` data), and import any needed libraries
