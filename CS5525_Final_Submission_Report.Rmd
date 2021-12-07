@@ -37,6 +37,7 @@ The goal of this project was to predict the probability of having a heart attack
 # II. Classification Methods Explored
 
 ## Decision Trees
+
 Decision trees are useful in classification to improve prediction accuracy. We explored bagging and random forest models. Figure 1 shows a classification tree used to predict whether someone is more or less likely to have a heart attack based on certain thresholds for each of the 14 predictors. 
 
 ![Classification tree for `heart` data-set.](classification_tree_original.png){height=60%}
@@ -51,13 +52,13 @@ We can also look at the prediction accuracy (??) for both the original (see figu
 ![Prediction accuracy of the original tree (left) compared to the pruned tree (right).](pruned_vs_original_table.png){height=6%}
 
 
-### Bagging
+### Bagging:
 
 Next, we used bagging, which is useful to reduce the variance and improve the prediction accuracy. The results of bagging are shown in figure 4. Given these results, we can conclude that thalassemia and chest pain type of the two most important attributes.  
 
 ![The side-by-side plots show the variables of importance in heart attack predictability. The table in the top-right shows the prediction accuracy for bagging.](bagging_plots.png){height=20%}
 
-### Random Forest
+### Random Forest:
 Finally, random forest was used to improve upon bagging and further improve prediction accuracy, shown in figure 5. We can see that after performing random forest, the variables of importance have changed. While thalassemia and chest pain type are still important, the random forest analysis shows that maximum heart rate achieved and number of major vessels are also of importance.
 
 ![The side-by-side plots show the variables of importance in heart attack predictability. The table in the top-right shows the prediction accuracy for random forest.](randomforest_plots.png){height=20%}
@@ -97,9 +98,33 @@ include_graphics("./confusion_matrix_tuned.png")
 
 ## Logistic Regression
 
-### Lasso
+LR predicts whether something is *True* or *False* instead of predicting something continuous. Here, we try to predict the probability that a person will get a heart disease or not.
 
-### Elastic Net
+### Pre-processing Data:
+
+For accurate predictions, we first process the raw data and convert a significant chunk of the variables into factors.
+
+```{r echo=FALSE, out.width="40%", out.height="40%", fig.show='hold', fig.align='center', fig.cap='Raw (left) and Processed (right) Data'}
+include_graphics(c("./raw_data.png", "./processed_data.png"))
+```
+
+### Comparing Models:
+
+We now compared the $R^2$ and `BIC` values to two models - one with only age as the independent variable and another with all the variables. The second model is the better model since it has a higher $R^2$ and a lower `BIC`, which is an indicator of a better fit. We note that since the median age in our data-set is 55, it makes sense why it *is not* a statistically significant variable in our complex model (that covers all variables).
+
+```{r echo=FALSE, out.width="40%", out.height="40%", fig.show='hold', fig.align='center', fig.cap='Simple (left) and Complex (right) Models'}
+include_graphics(c("./simple_logistic_model.png", "./complex_logistic_model.png"))
+```
+
+### Predicting Probability of Heart Disease:
+
+Finally, we plot the probability of predicting whether a person in our data-set has a heart disease. The upper-right portion of the logistic curve (cyan) shows the predicted probability a person will get a heart disease. The bottom-right portion of the logistic curve (light orange) shows the predicted probability a person will not get a heart disease.   
+
+```{r echo=FALSE, out.width="60%", out.height="60%", fig.align='center', fig.cap='Predicted Heart Disease Probability'}
+include_graphics("./logistic_prediction.png")
+```
+
+\newpage
 
 # III. Analysis
 

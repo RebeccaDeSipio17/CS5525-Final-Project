@@ -23,7 +23,6 @@ library(tree)
 library(randomForest)  # bootsrap/bagging & random forest
 library(class)         # KNN
 library(caret)         # SVM
-library(glmnet)        # logistic regression
 ```
 
 ## Decision Trees
@@ -201,82 +200,62 @@ confusionMatrix(table(svm.pred.grid, testing$target))
 ## Logistic Regression
 
 ```{r}
+library(ggplot2)
+library(cowplot)
+
 set.seed(2441139)
-# Organize data to get training and test data
+data <- read.csv("heart.csv")
+str(data)
 
-X <- as.matrix(heart, c("age", "sex", "cp", "trestbps", "chol", "fbs",
-                           "restecg", "thalach", "exang", "oldpeak", "slope",
-                           "ca", "thal"))
-y <- heart$target
+# pre-processing of data
+data$sex <- ifelse(test = data$sex == 0, yes = "F", no = "M")
+data$sex <- as.factor(data$sex)
+data$cp <- as.factor(data$cp)
+data$fbs <- as.factor(data$fbs)
+data$restecg <- as.factor(data$restecg)
+data$exang <- as.factor(data$exang)
+data$slope <- as.factor(data$slope)
+data$ca <- as.factor(data$ca)
+data$thal <- as.factor(data$thal)
+data$age <- as.numeric(data$age)
+data$trestbps <- as.numeric(data$trestbps)
+data$chol <- as.numeric(data$chol)
+data$thalach <- as.numeric(data$thalach)
+data$target <- ifelse(test = data$target == 0, yes = "Healthy", no = "Unhealthy")
+data$target <- as.factor(data$target)
+str(data)
 
-n <- nrow(X)
-train_rows <- sample(1:n, n * 0.7)
+# getting the number of samples based on gender
+xtabs(~ target + sex, data = data)
 
-X.train <- X[train_rows,]
-X.test <- X[-train_rows,]
-y.train <- y[train_rows]
-y.test <- y[-train_rows]
+# simple logistic model
+logistic <- glm(target ~ sex, data = data, family = "binomial")
+summary(logistic)
 
-dim(X.train)
-dim(X.test)
-grid <- 10^seq(10, -2, length = 100)
+R_sq_1 <- 1 - logistic$deviance / logistic$null.deviance
+R_sq_1
+BIC_1 <- logistic$deviance + 2 * log(dim(data)[1])
+BIC_1
 
-# ---------------------------------------------------------------------------- #
-#                                    Lasso                                     #
-# ---------------------------------------------------------------------------- #
+# complex logistic model
+logistic <- glm(target ~ ., data = data, family = "binomial")
+summary(logistic)
 
-# lasso model
-lasso.mod <- glmnet(X.train, as.factor(y.train), alpha = 1, lambda = grid,
-                    family = "binomial")
-plot(lasso.mod, xvar = "lambda", label = T)
+R_sq_2 <- 1 - logistic$deviance / logistic$null.deviance
+R_sq_2
+BIC_2 <- logistic$deviance + 14 * log(dim(data)[1])
+BIC_2
 
-# cross-validation for lambda
-cv.out <- cv.glmnet(X.train, as.factor(y.train), family = "binomial", alpha = 1,
-                    type.measure = "class")
-bestlam <- cv.out$lambda.min
-bestlam
+# why age isn't of statistical significance
+median(data$age)
 
-# coefficients of the best model
-best.lasso.mod <- glmnet(X.train, as.factor(y.train), alpha = 1, lambda = bestlam,
-                         family = "binomial")
-coef(best.lasso.mod)
+# plotting the probability of getting a heart disease
+predict.hd <- data.frame(prob.of.hd = logistic$fitted.values, hd = data$target)
+predict.hd <- predict.hd[order(predict.hd$prob.of.hd, decreasing = FALSE), ]
+predict.hd$rank <- 1:nrow(predict.hd)
 
-# test error
-lasso.pred <- predict(best.lasso.mod, newx = X.test, s = bestlam)
-lasso.mse <- mean((lasso.pred - y.test)^2)
-lasso.mse
-
-# non-zero coefficients
-lasso.coef <- predict(best.lasso.mod, type = "coefficients", s = bestlam)
-lasso.coef <- lasso.coef[which(lasso.coef != 0)]
-lasso.coef
-
-# ---------------------------------------------------------------------------- #
-#                                 Elastic Net                                  #
-# ---------------------------------------------------------------------------- #
-# elastic net model
-en.mod <- glmnet(X.train, as.factor(y.train), alpha = 0.5, lambda = grid,
-                 family = "binomial")
-plot(en.mod, xvar = "lambda", label = T)
-
-# cross-validation for lambda (with a fixed alpha)
-cv.out <- cv.glmnet(X.train, y.train, alpha = 0.5)
-bestlam <- cv.out$lambda.min
-
-# coefficients of the best model
-best.en.mod <- glmnet(X.train, as.factor(y.train), alpha = 0.5, lambda = bestlam,
-                      family = "binomial")
-coef(best.en.mod)
-
-# test error
-en.pred <- predict(best.en.mod, s = bestlam, newx = X.test)
-en.mse <- mean((en.pred - y.test)^2)
-en.mse
-
-# non-zero coefficients
-en.coef <- predict(best.en.mod, type = "coefficients", s = bestlam)
-en.coef <- en.coef[which(en.coef != 0)]
-en.coef
+ggplot(data = predict.hd, aes(x = rank, y = prob.of.hd)) +
+  geom_point(aes(color = hd), alpha = 1, shape = 4, stroke = 2) +
+  xlab("Index") +
+  ylab("Predicted probability of getting a heart disease")
 ```
-
-
