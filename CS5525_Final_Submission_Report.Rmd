@@ -71,16 +71,16 @@ SVM is a supervised classification method that separates data using *hyperplanes
 
 ### Model Training and Accuracy:
 
-We first train a linear classifier with the help of a *train control* method that uses *repeated cross-validation*, and then calculate prediction accuracy (82.2%) using a *confusion matrix*.
+We first train a linear classifier with the help of a *train control* method that uses *repeated cross-validation*, and then calculate prediction accuracy (77.8%) using a *confusion matrix*.
 
-```{r echo=FALSE, out.width="35%", out.height="35%", fig.align='center', fig.cap='Confusion Matrix with Cost = 1'}
+```{r echo=FALSE, out.width="35%", out.height="35%", fig.align='center', fig.cap='SVM Accuracy with Cost = 1'}
 library(knitr)
 include_graphics("./confusion_matrix.png")
 ```
 
 ### Choosing Different Costs:
 
-In order to improve model performance, we play with *Cost (C)* values in our classifier. For this we define a grid with specific *C* values. We then train our model again using the new *C* values. Our prediction accuracy is the most (83.5%) when $C = 0.01$, reflected in the plot below.
+In order to improve model performance, we play with *Cost (C)* values in our classifier. For this we define a grid with specific *C* values. We then train our model again using the new *C* values. Our prediction accuracy is the most (84.5%) when $C = 5$, reflected in the plot below.
 
 ```{r echo=FALSE, out.width="50%", out.height="50%", fig.align='center', fig.cap='Accuracy Plot with Varying Costs'}
 include_graphics("./svm_accuracy_plot.png")
@@ -88,9 +88,9 @@ include_graphics("./svm_accuracy_plot.png")
 
 ### Tuned Model:
 
-Finally, we test the model for the same *C* values. We do this by using *predict* over the *tuned* training model and the testing data-set, and checking the accuracy using the *confusion matrix*. We note that this ends up giving a higher accuracy rate (83.3%). 
+Finally, we test the model for the same *C* values. We do this by using *predict* over the *tuned* training model and the testing data-set, and checking the accuracy using the *confusion matrix*. We note that this ends up giving a higher accuracy rate (78.9%). 
 
-```{r echo=FALSE, out.width="35%", out.height="35%", fig.align='center', fig.cap='Confusion Matrix of the Tuned Model'}
+```{r echo=FALSE, out.width="35%", out.height="35%", fig.align='center', fig.cap='Accuracy of the Tuned SVM Model'}
 include_graphics("./confusion_matrix_tuned.png")
 ```
 
@@ -110,7 +110,7 @@ include_graphics(c("./raw_data.png", "./processed_data.png"))
 
 ### Comparing Models:
 
-We now compared the $R^2$ and `BIC` values to two models - one with only age as the independent variable and another with all the variables. The second model is the better model since it has a higher $R^2$ and a lower `BIC`, which is an indicator of a better fit. We note that since the median age in our data-set is 55, it makes sense why it *is not* a statistically significant variable in our complex model (that covers all variables).
+We now compared the $R^2$, `AIC`, and `BIC` values of the two models - one with only age as the independent variable and another with all the variables. The second model is the better model since it has a higher $R^2$ and a lower `BIC`, which is an indicator of a better fit. We note that since the median age in our data-set is 55, it makes sense why it *is not* a statistically significant variable in our complex model (that covers all variables). With an `AIC` value of 225.6 (versus 396.8), the second model is again, a better fit.
 
 ```{r echo=FALSE, out.width="40%", out.height="40%", fig.show='hold', fig.align='center', fig.cap='Simple (left) and Complex (right) Models'}
 include_graphics(c("./simple_logistic_model.png", "./complex_logistic_model.png"))
@@ -118,10 +118,18 @@ include_graphics(c("./simple_logistic_model.png", "./complex_logistic_model.png"
 
 ### Predicting Probability of Heart Disease:
 
-Finally, we plot the probability of predicting whether a person in our data-set has a heart disease. The upper-right portion of the logistic curve (cyan) shows the predicted probability a person will get a heart disease. The bottom-right portion of the logistic curve (light orange) shows the predicted probability a person will not get a heart disease.   
+We plot the probability of predicting whether a person in our data-set has a heart disease. The upper-right portion of the logistic curve (cyan) shows the probability a person *will* get a heart disease. The bottom-right portion of the logistic curve (light orange) shows the probability a person *will not* get a heart disease.   
 
 ```{r echo=FALSE, out.width="60%", out.height="60%", fig.align='center', fig.cap='Predicted Heart Disease Probability'}
 include_graphics("./logistic_prediction.png")
+```
+
+### Model Accuracy:
+
+Finally, we train the second model and predict its accuracy (77.8%) with a *confusion matrix*.
+
+```{r echo=FALSE, out.width="35%", out.height="35%", fig.align='center', fig.cap='Logistic Regression Accuracy'}
+include_graphics("./logistic_accuracy.png")
 ```
 
 \newpage

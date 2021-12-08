@@ -23,6 +23,8 @@ library(tree)
 library(randomForest)  # bootsrap/bagging & random forest
 library(class)         # KNN
 library(caret)         # SVM
+library(ggplot2)
+library(cowplot)
 ```
 
 ## Decision Trees
@@ -32,7 +34,7 @@ library(caret)         # SVM
 # Read in and organize data
 ## -- Read data
 heart <- read.csv("heart.csv")
-Target <- as.factor(heart$target) # target heart rate 
+Target <- as.factor(heart$target) # target heart rate
 
 ## -- Split into training and test sets
 train <- sample(1:nrow(heart), 0.75*nrow(heart))
@@ -40,7 +42,7 @@ heart.test <- heart[-train, ]
 Target.test <- Target[-train]
 
 # ---------------------------------------------------------------------------- #
-#                        Fit a Classification Tree                             #          
+#                        Fit a Classification Tree                             #
 # ---------------------------------------------------------------------------- #
 
 # Fit a classification tree to the training data
@@ -75,8 +77,8 @@ table(tree.pred, Target.test)
 set.seed(2441139)
 
 # Perform bagging
-bag.heart <- randomForest(as.factor(as.character(heart$target))~., data=heart, 
-                          subset=train, mtry=ncol(heart)-1, 
+bag.heart <- randomForest(as.factor(as.character(heart$target))~., data=heart,
+                          subset=train, mtry=ncol(heart)-1,
                           importance=TRUE)
 bag.heart
 
@@ -91,8 +93,8 @@ varImpPlot(bag.heart)
 set.seed(2441139)
 
 # Perform Random Forest
-rf.heart <- randomForest(as.factor(as.character(heart$target))~., data=heart, 
-                          subset=train, mtry=sqrt(ncol(heart)-1), 
+rf.heart <- randomForest(as.factor(as.character(heart$target))~., data=heart,
+                          subset=train, mtry=sqrt(ncol(heart)-1),
                           ntree=25, importance=TRUE)
 rf.heart
 
@@ -111,8 +113,8 @@ varImpPlot(rf.heart)
 Acc <- rep(0,ncol(heart)-2)
 for (m in 1:(ncol(heart)-2)){
   set.seed(2441139)
-  rf.heart <- randomForest(as.factor(as.character(heart$target))~., data=heart, 
-                           subset=train, mtry=m, 
+  rf.heart <- randomForest(as.factor(as.character(heart$target))~., data=heart,
+                           subset=train, mtry=m,
                            ntree=25)
   rf.pred <- predict(rf.heart, heart.test, type='class')
   t <- table(rf.pred, Target.test)
@@ -125,8 +127,8 @@ plot(1:(ncol(heart)-2), Acc, xlab='mtry', ylab='Accuracy of random forest') # in
 
 # Now use the best value of m for the random forest
 set.seed(2441139)
-rf.heart <- randomForest(as.factor(as.character(heart$target))~., data=heart, 
-                         subset=train, mtry=mbest, 
+rf.heart <- randomForest(as.factor(as.character(heart$target))~., data=heart,
+                         subset=train, mtry=mbest,
                          ntree=25, importance=TRUE)
 rf.heart
 
@@ -200,57 +202,55 @@ confusionMatrix(table(svm.pred.grid, testing$target))
 ## Logistic Regression
 
 ```{r}
-library(ggplot2)
-library(cowplot)
-
 set.seed(2441139)
-data <- read.csv("heart.csv")
-str(data)
 
 # pre-processing of data
-data$sex <- ifelse(test = data$sex == 0, yes = "F", no = "M")
-data$sex <- as.factor(data$sex)
-data$cp <- as.factor(data$cp)
-data$fbs <- as.factor(data$fbs)
-data$restecg <- as.factor(data$restecg)
-data$exang <- as.factor(data$exang)
-data$slope <- as.factor(data$slope)
-data$ca <- as.factor(data$ca)
-data$thal <- as.factor(data$thal)
-data$age <- as.numeric(data$age)
-data$trestbps <- as.numeric(data$trestbps)
-data$chol <- as.numeric(data$chol)
-data$thalach <- as.numeric(data$thalach)
-data$target <- ifelse(test = data$target == 0, yes = "Healthy", no = "Unhealthy")
-data$target <- as.factor(data$target)
-str(data)
+str(heart)
+
+heart$sex <- ifelse(test = heart$sex == 0, yes = "F", no = "M")
+heart$sex <- as.factor(heart$sex)
+heart$cp <- as.factor(heart$cp)
+heart$fbs <- as.factor(heart$fbs)
+heart$restecg <- as.factor(heart$restecg)
+heart$exang <- as.factor(heart$exang)
+heart$slope <- as.factor(heart$slope)
+heart$ca <- as.factor(heart$ca)
+heart$thal <- as.factor(heart$thal)
+heart$age <- as.numeric(heart$age)
+heart$trestbps <- as.numeric(heart$trestbps)
+heart$chol <- as.numeric(heart$chol)
+heart$thalach <- as.numeric(heart$thalach)
+heart$target <- ifelse(test = heart$target == 0, yes = "Healthy", no = "Unhealthy")
+heart$target <- as.factor(heart$target)
+
+str(heart)
 
 # getting the number of samples based on gender
-xtabs(~ target + sex, data = data)
+xtabs(~ target + sex, data = heart)
 
 # simple logistic model
-logistic <- glm(target ~ sex, data = data, family = "binomial")
+logistic <- glm(target ~ sex, data = heart, family = "binomial")
 summary(logistic)
 
 R_sq_1 <- 1 - logistic$deviance / logistic$null.deviance
 R_sq_1
-BIC_1 <- logistic$deviance + 2 * log(dim(data)[1])
+BIC_1 <- logistic$deviance + 2 * log(dim(heart)[1])
 BIC_1
 
 # complex logistic model
-logistic <- glm(target ~ ., data = data, family = "binomial")
-summary(logistic)
+logistic <- glm(target ~ ., data = heart, family = "binomial")
+# summary(logistic)
 
 R_sq_2 <- 1 - logistic$deviance / logistic$null.deviance
 R_sq_2
-BIC_2 <- logistic$deviance + 14 * log(dim(data)[1])
+BIC_2 <- logistic$deviance + 14 * log(dim(heart)[1])
 BIC_2
 
 # why age isn't of statistical significance
-median(data$age)
+median(heart$age)
 
 # plotting the probability of getting a heart disease
-predict.hd <- data.frame(prob.of.hd = logistic$fitted.values, hd = data$target)
+predict.hd <- data.frame(prob.of.hd = logistic$fitted.values, hd = heart$target)
 predict.hd <- predict.hd[order(predict.hd$prob.of.hd, decreasing = FALSE), ]
 predict.hd$rank <- 1:nrow(predict.hd)
 
@@ -258,4 +258,10 @@ ggplot(data = predict.hd, aes(x = rank, y = prob.of.hd)) +
   geom_point(aes(color = hd), alpha = 1, shape = 4, stroke = 2) +
   xlab("Index") +
   ylab("Predicted probability of getting a heart disease")
+
+# predicting model accuracy
+log.mod <- glm(target ~ ., data = training, family = "binomial")
+log.pred <- predict(log.mod, newdata = testing, type = "response")
+log.pred <- ifelse(log.pred > 0.5, 1, 0)
+confusionMatrix(table(log.pred, testing$target))
 ```
