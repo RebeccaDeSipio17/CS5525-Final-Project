@@ -136,7 +136,6 @@ rf.heart
 rf.pred <- predict(rf.heart, heart.test, type='class')
 table(rf.pred, Target.test)
 varImpPlot(rf.heart)
-
 ```
 
 ## KNN
@@ -281,7 +280,7 @@ BIC_1
 
 # complex logistic model
 logistic <- glm(target ~ ., data = heart, family = "binomial")
-# summary(logistic)
+summary(logistic)
 
 R_sq_2 <- 1 - logistic$deviance / logistic$null.deviance
 R_sq_2
