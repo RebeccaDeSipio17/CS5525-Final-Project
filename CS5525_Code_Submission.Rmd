@@ -143,9 +143,51 @@ varImpPlot(rf.heart)
 
 ```{r}
 # K-Nearest Neighbor
+set.seed(2441139)
+
+# Read data
+heart <- read.csv("heart.csv")
+Target <- as.factor(heart$target)
+
+# Split into training and test sets
+train <- sample(1:nrow(heart), 0.75*nrow(heart))
+heart.test <- heart[-train, ]
+Target.test <- Target[-train]
+
+# Normalizing function
+normalizer <-function(x){(x -min(x))/(max(x)-min(x))}
+
+# Use normalized set to do cross-validation
+trControl <- trainControl(method  = "cv",
+                          number  = 5)
+fit <- train(as.factor(target) ~ .,
+             method     = "knn",
+             tuneGrid   = expand.grid(k = 1:15),
+             trControl  = trControl,
+             metric     = "Accuracy",
+             data       = as.data.frame(lapply(heart, normalizer)))
+
+# For best value of k perform training
+heart.norm <- as.data.frame(lapply(heart[,1:13], normalizer))
+
+# Get training and test set
+heart.norm.train <- heart.norm[train,]
+heart.norm.test <- heart.norm[-train,]
+
+# Get cl argument
 cl <- as.factor(heart$target[train])
-knn.heart <- knn(heart[train,], heart.test, cl, k = 5, prob=TRUE)
-table(knn.heart, Target.test)
+
+# Train and get confusion matrix
+knn.heart <- knn(heart.norm.train, heart.norm.test, cl, k = 12, prob=TRUE)
+cm <- table(knn.heart, Target.test)
+(cm)
+acc <- sum(diag(cm))/sum(cm)
+
+# Train and get confusion matrix for un-normalized data
+knn.heart <- knn(heart[train,1:13],heart[-train,1:13], cl, k = 5, prob=TRUE)
+cm <- table(knn.heart, Target.test)
+(cm)
+acc <- sum(diag(cm))/sum(cm)
 ```
 
 ## SVM

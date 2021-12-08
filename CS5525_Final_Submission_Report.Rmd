@@ -12,11 +12,9 @@ output:
 
 # I. Introduction
 
-The goal of this project was to predict the probability of having a heart attack using 14 variables given in the heart.csv data-set. The classification models chosen to analyze this data-set were: random forest, bagging, support vector machines (SVM), and k-nearest neighbor (KNN). After exploring these various classification methods, we can analyze and interpret the results of each method to determine which might be the “best” classifier. Additionally, the logistic regression methods, lasso and elastic net, were taken into consideration to explore which variables are most important. (add sentence on the importance of this)
+The goal of this project is to predict the probability of having a heart attack using 13 variables given in the heart.csv data-set. With the response variable being of binary categorical form, classification methods were preferred. Subsequently, in this project, classification models chosen to analyze this data-set were: decision tree and its variants (random forest and bagging), support vector machines (SVM), logistic regression, and k-nearest neighbor (KNN). After exploring these various classification methods, we analyze and interpret the results of each method to determine which might be the “best” classifier. 
 
-
-
-**Attribute Information:**
+The data used is the [heart.csv](https://www.kaggle.com/nareshbhat/health-care-data-set-on-heart-attack-possibility) data. It contains the following attributes:
 
   - `age`
   - `sex`
@@ -32,6 +30,8 @@ The goal of this project was to predict the probability of having a heart attack
   - `ca`: number of major vessels (0 - 3) colored by fluoroscope
   - `thal`: thalassemia (blood disorder) 0 = normal; 1 = fixed defect; 2 = reversible defect
   - `target`: 0 = less chance of heart attack; 1 = more chance of heart attack
+  
+Of the 14 attributes, the binary "target" variable is considered the response variable, dependent on the remainder of the attributes. For the remainder of this report, all models considered using the 13 predictor variables to perform prediction on "target".
 
 
 # II. Classification Methods Explored
@@ -43,7 +43,7 @@ Decision trees are useful in classification to improve prediction accuracy. We e
 ![Classification tree for `heart` data-set.](classification_tree_original.png){height=60%}
 
 
-Next, we decided to prune the classification tree, shown in figure 2. 
+Next, we decided to prune the classification tree, shown in figure 2. As we can see, the pruned tree reduced the number (add more here)
 
 ![Pruned classification tree.](classification_tree_pruned.png){height=25%}
 
@@ -62,6 +62,12 @@ Next, we used bagging, which is useful to reduce the variance and improve the pr
 Finally, random forest was used to improve upon bagging and further improve prediction accuracy, shown in figure 5. We can see that after performing random forest, the variables of importance have changed. While thalassemia and chest pain type are still important, the random forest analysis shows that maximum heart rate achieved and number of major vessels are also of importance.
 
 ![The side-by-side plots show the variables of importance in heart attack predictability. The table in the top-right shows the prediction accuracy for random forest.](randomforest_plots.png){height=20%}
+
+Random Forest Plots
+
+![Accuracy plot.](rf_accuracy_plot.png){height=20%}
+
+![Random Forest variables of importance.](rf_best_plots.png){height=20%}
 
 \newpage
 
@@ -94,7 +100,37 @@ Finally, we test the model for the same *C* values. We do this by using *predict
 include_graphics("./confusion_matrix_tuned.png")
 ```
 
+\newpage
+
 ## KNN
+
+The K-nearest neighbors algorithm is a simple algorithm that closely follows the concept of the Bayes classifier. For a given data, with predictor variables, $X$, and a response variable, $y$ with $k$ classes, the Bayes classifier seeks to first establish a conditional probability of the classes of $y$ given $X$. With a new observation, $x_n$, the prediction made is the class $j$ with the highest conditional probability given $x_n$. 
+
+Establishing a conditional distribution for the data at hand may be impossible. Consequently, the KNN algorithm uses a frequentist approach to establish a conditional probability distribution for only subsets of the data. For a new observation $x_n$, the KNN algorithm finds the distance from $x_n$ to each of the points in $X$, selecting the $k$ nearest points. These are the $k$ nearest neighbors of $x_n$. Let $y^{(kn)}$ be the classes of the $k$ nearest neighbors of $x_n$. With this subset of data points, a conditional probability is calculated as in (\ref{eqn:j1}). 
+\begin{equation}
+  Pr(Y=j|X=x_n) = \frac{1}{k} \sum_{y_i\in y^{kn}}{I(y_i=j)}
+  \label{eqn:j1}
+\end{equation}
+
+In (\ref{eqn:j1}), $I$ is the indicator function that evaluates to 1 if the condition holds, and 0 if otherwise. Thus, (\ref{eqn:j1}) determines a frequency, which also is the conditional probability given $x_n$ for each class $j$ of the response variable. The predicted class, therefore, is $j$ such that Pr(Y=j|X=x_n) is maximum. 
+
+The KNN algorithm is applied to the normalized heart.csv data set, using an optimum value of $k=12$. The confusion matrix obtained is as shown below, and the accuracy obtained is 0.789. 
+
+![Results of KNN classfication with normalize data.](KNN_norm.PNG){height=6%}
+
+As $k$ is a hyper-parameter, it must be determined a priori. Through a 5-fold cross-validation, different values of $k$ are applied and the optimal is chosen. As observed from below, the best value of $k$ is 5. This was used in the remainder of the KNN study. 
+
+Considering that the KNN algorithm works by finding the distance of the new data point from the $k$ nearest points, it is likely that the effect of certain parameters which are on a higher scale will become dominant over others on a lower scale. This potentially affects the accuracy of prediction. It is therefore useful that the data is normalized prior to performing KNN. In this study, the Euclidean distance was used, and normalization applied as follows. Let $X$ be the data set of parameters, and let $X_{min}$ be the $1\times p$ minimum vector of $X$. Also, let $X_{max}$ be the $1\times p$ column-wise maximum vector of $X$. Then, in this application, for each data point, $X_i$, normalization is performed according to (\ref{eqn:j2}).
+\begin{equation}
+  X_{inorm}  = \frac{X_i - X_{min}}{X_{max} - X_{min}}
+  \label{eqn:j2}
+\end{equation}
+
+Without normalization, the following prediction table was obtained for an optimal $k=5$. The corresponding accuracy is 0.684.
+
+![Results of KNN prediction from unnormalized data.](KNN unormalized.PNG){height=6%}
+
+In an earlier section, the accuracy of the KNN algorithm applied to the normalized data was 0.789. Compared to the accuracy of the un-normalized data, one can see an improvement of over 15% accuracy. This underscores the need for normalization of data for especially distance-based algorithms such as the KNN.
 
 ## Logistic Regression
 
@@ -136,23 +172,10 @@ include_graphics("./logistic_accuracy.png")
 
 # III. Analysis
 
-## Best Model
 
-Random Forest Plots
-
-![Accuracy plot.](rf_accuracy_plot.png){height=20%}
-
-![Random Forest variables of importance.](rf_best_plots.png){height=20%}
-
-
-{A couple paragraphs on determining a best model for each classfication method - should have 6 total}
-
-## Comparison of Models
-
-{Determine then the best model by looking at prediction accuracy and MSE (for logistic regression)}
 
 # IV. Conclusion
 
-# V. Notes and References
+# V. References
 
 

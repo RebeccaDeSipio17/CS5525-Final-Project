@@ -1,0 +1,88 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+## K-Nearest Neighbors
+The K-nearest neighbors algorithm is a simple algorithm that closely follows the concept of the Bayes classifier. For a given data, with predictor variables, $X$, and a response variable, $y$ with $k$ classes, the Bayes classifier seeks to first establish a conditional probability of the classes of $y$ given $X$. With a new observation, $x_n$, the prediction made is the class $j$ with the highest conditional probability given $x_n$. 
+
+Establishing a conditional distribution for the data at hand may be impossible. Consequently, the KNN algorithm uses a frequentist approach to establish a conditional probability distribution for only subsets of the data. For a new observation $x_n$, the KNN algorithm finds the distance from $x_n$ to each of the points in $X$, selecting the $k$ nearest points. These are the $k$ nearest neighbors of $x_n$. Let $y^{(kn)}$ be the classes of the $k$ nearest neighbors of $x_n$. With this subset of data points, a conditional probability is calculated as in (\ref{eqn:j1}). 
+\begin{equation}
+  Pr(Y=j|X=x_n) = \frac{1}{k} \sum_{y_i\in y^{kn}}{I(y_i=j)}
+  \label{eqn:j1}
+\end{equation}
+
+In (\ref{eqn:j1}), $I$ is the indicator function that evaluates to 1 if the condition holds, and 0 if otherwise. Thus, (\ref{eqn:j1}) determines a frequency, which also is the conditional probability given $x_n$ for each class $j$ of the response variable. The predicted class, therefore, is $j$ such that Pr(Y=j|X=x_n) is maximum. 
+
+The KNN algorithm is applied to the normalized heart.csv data set, using an optimum value of $k=12$. The confusion matrix obtained is as shown below, and the accuracy obtained is 0.789. 
+```{r, echo=FALSE}
+set.seed(2441139)
+library(tree)
+
+# Read data
+heart <- read.csv("heart.csv")
+Target <- as.factor(heart$target)
+
+# Split into training and test sets
+train <- sample(1:nrow(heart), 0.75*nrow(heart))
+heart.test <- heart[-train, ]
+Target.test <- Target[-train]
+
+# K-Nearest Neighbor
+library(class)
+library(caret)
+
+# Normalizing function
+normalizer <-function(x){(x -min(x))/(max(x)-min(x))}
+
+# Use normalized set to do cross-validation
+trControl <- trainControl(method  = "cv",
+                          number  = 5)
+fit <- train(as.factor(target) ~ .,
+             method     = "knn",
+             tuneGrid   = expand.grid(k = 1:15),
+             trControl  = trControl,
+             metric     = "Accuracy",
+             data       = as.data.frame(lapply(heart, normalizer)))
+
+# For best value of k perform training
+heart.norm <- as.data.frame(lapply(heart[,1:13], normalizer))
+
+# Get training and test set
+heart.norm.train <- heart.norm[train,]
+heart.norm.test <- heart.norm[-train,]
+
+# Get cl argument
+cl <- as.factor(heart$target[train])
+
+# Train and get confusion matrix
+knn.heart <- knn(heart.norm.train, heart.norm.test, cl, k = 12, prob=TRUE)
+cm <- table(knn.heart, Target.test)
+(cm)
+acc <- sum(diag(cm))/sum(cm)
+
+```
+
+
+## Analysis
+As $k$ is a hyper-parameter, it must be determined a priori. Through a 5-fold cross-validation, different values of $k$ are applied and the optimal is chosen. As observed from below, the best value of $k$ is 5. This was used in the remainder of the KNN study. 
+```{r, echo=FALSE}
+fit
+```
+
+Considering that the KNN algorithm works by finding the distance of the new data point from the $k$ nearest points, it is likely that the effect of certain parameters which are on a higher scale will become dominant over others on a lower scale. This potentially affects the accuracy of prediction. It is therefore useful that the data is normalized prior to performing KNN. In this study, the Euclidean distance was used, and normalization applied as follows. Let $X$ be the data set of parameters, and let $X_{min}$ be the $1\times p$ minimum vector of $X$. Also, let $X_{max}$ be the $1\times p$ column-wise maximum vector of $X$. Then, in this application, for each data point, $X_i$, normalization is performed according to (\ref{eqn:j2}).
+\begin{equation}
+  X_{inorm}  = \frac{X_i - X_{min}}{X_{max} - X_{min}}
+  \label{eqn:j2}
+\end{equation}
+
+Without normalization, the following prediction table was obtained for an optimal $k=5$. The corresponding accuracy is 0.684.
+```{r, echo=FALSE}
+# Train and get confusion matrix
+knn.heart <- knn(heart[train,1:13],heart[-train,1:13], cl, k = 5, prob=TRUE)
+cm <- table(knn.heart, Target.test)
+(cm)
+acc <- sum(diag(cm))/sum(cm)
+```
+
+In an earlier section, the accuracy of the KNN algorithm applied to the normalized data was 0.789. Compared to the accuracy of the un-normalized data, one can see an improvement of over 15% accuracy. This underscores the need for normalization of data for especially distance-based algorithms such as the KNN.
