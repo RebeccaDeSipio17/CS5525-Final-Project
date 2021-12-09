@@ -38,36 +38,34 @@ Of the 14 attributes, the binary "target" variable is considered the response va
 
 ## Decision Trees
 
-Decision trees are useful in classification to improve prediction accuracy. We explored bagging and random forest models. Figure 1 shows a classification tree used to predict whether someone is more or less likely to have a heart attack based on certain thresholds for each of the 14 predictors.
+Decision trees are useful in classification to improve prediction accuracy. We explored bagging and random forest models. First however, we will look at a classification tree as shown in Figure 1, which is used to predict whether someone is more or less likely to have a heart attack based on certain thresholds for each of the 13 predictors. We can take for example the classification tree in Figure 1 and follow one of the paths on the left to determine the likelihood of an individual having heart disease. It would be traced as follows: if an individual has a thalassemia rating less than 2.5, greater than 0.5 major vessels, chest pain valued less than 0.5, and age greater than 62, the individual is likely to have heart disease.  
 
 ![Classification tree for `heart` data-set.](classification_tree_original.png){height=60%}
 
+Next, we decided to prune the classification tree, shown in Figure 2. As we can see, the pruned tree has less branches than the original, changing from four main branches to two. Pruning is used to reduce the number of branches in the tree to include only the attributes that are of most importance in determining whether an individual is more likely to have heart disease. For the pruned tree in Figure 2, thalassemia, number of major vessels, chest pain type, maximum heart rate achieved, cholesterol, age, and resting blood pressure. 
 
-Next, we decided to prune the classification tree, shown in figure 2. As we can see, the pruned tree reduced the number (add more here)
+\newpage
 
 ![Pruned classification tree.](classification_tree_pruned.png){height=25%}
 
-We can also look at the prediction accuracy (??) for both the original (see figure 3) and pruned trees and compare the outputted results.
+For both classification trees (original and pruned), we can now look at the prediction accuracy and compare the outputted results. Figure 3 shows the confusion matrix for each of the trees, and the prediction accuracy can be calculated from this by taking: $$\frac{\text{true positive} + \text{true negative}}{\text{true positive} + \text{true negative} + \text{false positive} + \text{false negative}}$$ 
 
-![Prediction accuracy of the original tree (left) compared to the pruned tree (right).](pruned_vs_original_table.png){height=6%}
+![Confusion matrices used to determine prediction accuracy of the original tree (left) compared to the pruned tree (right).](pruned_vs_original_table.png){height=6%}
 
+Based on the confusion matrix, true positive and true negative are given by the (00) and (11) positions. The prediction accuracy for the original and pruned tree is then given by 76.32% and 82.89%, respectively. Therefore, we can see that pruning the tree did in fact improve the accuracy of classification. 
 
 ### Bagging:
 
-Next, we used bagging, which is useful to reduce the variance and improve the prediction accuracy. The results of bagging are shown in figure 4. Given these results, we can conclude that thalassemia and chest pain type of the two most important attributes.
+Next, we used bagging, which is useful to reduce the variance and improve the prediction accuracy. The results of bagging are shown in Figure 4. Given these results, we can conclude that thalassemia and chest pain type are the two most important attributes. Additionally the prediction accuracy, calculated from the confusion matrix in Figure 4, was 78.95%.
 
-![The side-by-side plots show the variables of importance in heart attack predictability. The table in the top-right shows the prediction accuracy for bagging.](bagging_plots.png){height=20%}
+![The side-by-side plots show the variables of importance in heart attack predictability. The table in the top-right shows the confusion matrix for bagging.](bagging_plots.png){height=20%}
+
+\newpage
 
 ### Random Forest:
-Finally, random forest was used to improve upon bagging and further improve prediction accuracy, shown in figure 5. We can see that after performing random forest, the variables of importance have changed. While thalassemia and chest pain type are still important, the random forest analysis shows that maximum heart rate achieved and number of major vessels are also of importance.
+Finally, random forest was used to improve upon bagging and further improve prediction accuracy, shown in Figure 5. We can see that after performing random forest, the variables of importance have changed. While thalassemia and chest pain type are still important, the random forest analysis shows that maximum heart rate achieved and number of major vessels are also of importance. Additionally, the prediction accuracy has improved from that of bagging to a value of 85.53%. 
 
-![The side-by-side plots show the variables of importance in heart attack predictability. The table in the top-right shows the prediction accuracy for random forest.](randomforest_plots.png){height=20%}
-
-Random Forest Plots
-
-![Accuracy plot.](rf_accuracy_plot.png){height=20%}
-
-![Random Forest variables of importance.](rf_best_plots.png){height=20%}
+![The side-by-side plots show the variables of importance in heart attack predictability. The table in the top-right shows the confusion matrix for random forest.](randomforest_plots.png){height=20%}
 
 \newpage
 
@@ -172,6 +170,16 @@ include_graphics("./logistic_accuracy.png")
 
 # III. Analysis
 
+**Table of prediction accuracy for each of the six methods explored**
+
+Classification Method         | Prediction Accuracy (%) |
+| :-------------------------: | :---------------------: | 
+Classification Tree           |            76.32        |   
+Classification Tree (pruned)  |            82.89        |
+Bagging                       |            78.95        |
+Support Vector Machines       |            78.90        |
+KNN                           |            78.90        |
+Logistic Regression           |            77.80        |
 
 
 # IV. Conclusion
