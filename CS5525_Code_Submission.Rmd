@@ -204,8 +204,10 @@ training[["target"]] <- as.factor(training[["target"]])
 dim(training)
 dim(testing)
 
-# model training with svm
+# set up repeated k-fold cross-validation
 trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+# model training with svm
 svm.mod <- train(target ~ ., data = training, method = "svmLinear",
                  trControl = trctrl,
                  preProcess = c("center", "scale"),
@@ -219,25 +221,28 @@ svm.pred
 # accuracy of the trained model
 confusionMatrix(table(svm.pred, testing$target))
 
-# costs for further tuning with 10-fold cross-validation
-grid <- expand.grid(C = c(0, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 5))
+# costs for further tuning
+grid <- expand.grid(C = seq(0, 2, length = 20))
 
-svm.mod.grid <- train(target ~ ., data = training, method = "svmLinear",
+svm.mod.tuned <- train(target ~ ., data = training, method = "svmLinear",
                       trControl = trctrl,
                       preProcess = c("center", "scale"),
                       tuneGrid = grid,
                       tuneLength = 10)
-svm.mod.grid
+svm.mod.tuned
 
-# accuracy plot of tuned model
-plot(svm.mod.grid)
+# accuracy plot with varying costs
+plot(svm.mod.tuned)
+
+# best cost value that maximizes model accuracy
+svm.mod.tuned$bestTune
 
 # prediction using tuned model
-svm.pred.grid <- predict(svm.mod.grid, newdata = testing)
-svm.pred.grid
+svm.pred.tuned <- predict(svm.mod.tuned, newdata = testing)
+svm.pred.tuned
 
 # accuracy of the tuned model
-confusionMatrix(table(svm.pred.grid, testing$target))
+confusionMatrix(table(svm.pred.tuned, testing$target))
 ```
 
 ## Logistic Regression
@@ -266,8 +271,14 @@ heart$target <- as.factor(heart$target)
 
 str(heart)
 
-# getting the number of samples based on gender
+# getting the number of samples by gender
 xtabs(~ target + sex, data = heart)
+
+# getting the number of samples by chest pain
+xtabs(~ target + cp, data = heart)
+
+# getting the number of samples by resting ECG
+xtabs(~ target + restecg, data = heart)
 
 # simple logistic model
 logistic <- glm(target ~ sex, data = heart, family = "binomial")

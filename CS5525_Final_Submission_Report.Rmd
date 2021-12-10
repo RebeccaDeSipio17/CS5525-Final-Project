@@ -7,12 +7,13 @@ output:
     toc: yes
   html_document:
     toc: yes
+urlcolor: blue
 ---
 
 
 # I. Introduction
 
-The goal of this project was to predict the probability of having a heart attack using 14 variables given in the heart.csv data-set. The classification models chosen to analyze this data-set were: random forest, bagging, support vector machines (SVM), and k-nearest neighbor (KNN). After exploring these various classification methods, we can analyze and interpret the results of each method to determine which might be the “best” classifier. Additionally, since the dependent variable is dichotomous (binary), (two) logistic regression models were taken into consideration for predictive analysis. The logit models help us determine the probability that a person is likely to suffer from a heart disease or not.
+The goal of this project is to compare how various classification algorithms perform on a sample data set. The algorithms of interest are: decision tree (and its variant, random forest), support vector machine (SVM), and k-nearest neighbor (KNN). The data contains thirteen predictor variables and a dichotomous response variable, which indicates whether a patient has a high risk of heart attack or not. Therefore, additionally, (two) logistic regression models were taken into consideration for predictive analysis. 
 
 The data used is the [heart.csv](https://www.kaggle.com/nareshbhat/health-care-data-set-on-heart-attack-possibility) data. It contains the following attributes:
 
@@ -31,39 +32,39 @@ The data used is the [heart.csv](https://www.kaggle.com/nareshbhat/health-care-d
   - `thal`: thalassemia (blood disorder) 0 = normal; 1 = fixed defect; 2 = reversible defect
   - `target`: 0 = less chance of heart attack; 1 = more chance of heart attack
 
-Of the 14 attributes, the binary "target" variable is considered the response variable, dependent on the remainder of the attributes. For the remainder of this report, all models considered using the 13 predictor variables to perform prediction on "target".
+Here, the response varible is "target". Subsequently, for the remainder of this report, all models considered apply the 13 predictor variables to perform prediction on "target".
 
 
 # II. Classification Methods Explored
 
 ## Decision Trees
 
-Decision trees are useful in classification to improve prediction accuracy. We explored bagging and random forest models. First however, we will look at a classification tree as shown in Figure 1, which is used to predict whether someone is more or less likely to have a heart attack based on certain thresholds for each of the 13 predictors. We can take for example the classification tree in Figure 1 and follow one of the paths on the left to determine the likelihood of an individual having heart disease. It would be traced as follows: if an individual has a thalassemia rating less than 2.5, greater than 0.5 major vessels, chest pain valued less than 0.5, and age greater than 62, the individual is likely to have heart disease.  
+Decision trees are perhaps the most human-friendly classification algorithm. The model produced is a tree, whose branches represent certain conditions. The tree-like output is easily understood. Using the given data set, the decision tree in Figure 1 was produced. For instance, if an individual has a thalassemia rating less than 2.5, greater than 0.5 major vessels, chest pain valued less than 0.5, and age greater than 62, then the tree predicts the individual  to have a high chance of heart attack.  
 
 ![Classification tree for `heart` data-set.](classification_tree_original.png){height=60%}
 
-Next, we decided to prune the classification tree, shown in Figure 2. As we can see, the pruned tree has less branches than the original, changing from four main branches to two. Pruning is used to reduce the number of branches in the tree to include only the attributes that are of most importance in determining whether an individual is more likely to have heart disease. For the pruned tree in Figure 2, thalassemia, number of major vessels, chest pain type, maximum heart rate achieved, cholesterol, age, and resting blood pressure. 
+The tree in Figure 1 has many branches, and subsequently, leaf nodes. Pruning is applied to reduce the size of the tree and increase its simplicity. In some cases, pruning also increases the prediction accuracy. The pruned tree is shown in Figure 2. As may be observed, the pruned tree has significantly fewer branches than the original, changing from four main branches to two. Pruning works by reducing the number of branches in the tree to include only the attributes that are of most importance in determining the response. For the pruned tree in Figure 2, these are thalassemia, number of major vessels, chest pain type, maximum heart rate achieved, cholesterol, age, and resting blood pressure. 
 
 \newpage
 
 ![Pruned classification tree.](classification_tree_pruned.png){height=25%}
 
-For both classification trees (original and pruned), we can now look at the prediction accuracy and compare the outputted results. Figure 3 shows the confusion matrix for each of the trees, and the prediction accuracy can be calculated from this by taking: $$\frac{\text{true positive} + \text{true negative}}{\text{true positive} + \text{true negative} + \text{false positive} + \text{false negative}}$$ 
+For both trees (original and pruned), we shall compare the prediction accuracy. Figure 3 shows the confusion matrix for each of the trees, and the prediction accuracy can be calculated from this by taking: $$\frac{\text{true positive} + \text{true negative}}{\text{true positive} + \text{true negative} + \text{false positive} + \text{false negative}}$$ 
 
 ![Confusion matrices used to determine prediction accuracy of the original tree (left) compared to the pruned tree (right).](pruned_vs_original_table.png){height=6%}
 
-Based on the confusion matrix, true positive and true negative are given by the (00) and (11) positions. The prediction accuracy for the original and pruned tree is then given by 76.32% and 82.89%, respectively. Therefore, we can see that pruning the tree did in fact improve the accuracy of classification. 
+Based on the confusion matrix, true positive and true negative are given by the diagonal elements (i.e., values in the (00) and (11) positions). The prediction accuracy for the original tree and the pruned tree 76.32% and 82.89%, respectively. Therefore, in this application, pruning not only increased the simplicity of the tree, but also improved the prediction accuracy. 
 
 ### Bagging:
 
-Next, we used bagging, which is useful to reduce the variance and improve the prediction accuracy. The results of bagging are shown in Figure 4. Given these results, we can conclude that thalassemia and chest pain type are the two most important attributes. Additionally the prediction accuracy, calculated from the confusion matrix in Figure 4, was 78.95%.
+Next, we used bagging, which is useful to reduce the variance and potentially improve the prediction accuracy. The results of bagging are shown in Figure 4. Given these results, we can conclude that thalassemia and chest pain type are the two most important attributes, while serum cholesterol is the least important. Additionally the prediction accuracy, calculated from the confusion matrix in Figure 4, is 78.95%. Clearly, while bagging improves the prediction accuracy of the original tree, it under-performs, compared to the pruned tree which is simpler. 
 
 ![The side-by-side plots show the variables of importance in heart attack predictability. The table in the top-right shows the confusion matrix for bagging.](bagging_plots.png){height=20%}
 
 \newpage
 
 ### Random Forest:
-Finally, random forest was used to improve upon bagging and further improve prediction accuracy, shown in Figure 5. We can see that after performing random forest, the variables of importance have changed. While thalassemia and chest pain type are still important, the random forest analysis shows that maximum heart rate achieved and number of major vessels are also of importance. Additionally, the prediction accuracy has improved from that of bagging to a value of 85.53%. 
+Random forests are a variant of decision trees, combining several trees to make a single prediction. It builds a tree from randomly chosen subsets of the predictor variables. The final prediction for new data is the class predicted by majority of the trees in the forest. Applying random forest to the data set, the result shown in Figure 5 is obtained. One may observe that after performing random forest, the variables of importance have changed. While thalassemia and chest pain type are still important, their order of importance have changed, and the random forest has elevated maximum heart rate and number of major vessels in order of importance. Additionally, the prediction accuracy of 85.53% is a significant improvement over that of the pruned tree. This result is reasonable, and expected. The consensus of a collection of uncorrelated trees is likely to outperform the decision of a single tree. While some trees in the forest may output the wrong predictions, others would predict the correct response, so that altogether, a more objective consensus is reached. 
 
 ![The side-by-side plots show the variables of importance in heart attack predictability. The table in the top-right shows the confusion matrix for random forest.](randomforest_plots.png){height=20%}
 
@@ -71,11 +72,11 @@ Finally, random forest was used to improve upon bagging and further improve pred
 
 ## Support Vector Machines
 
-SVM is a supervised classification method that separates data using *hyperplanes*, which act as a decision boundary between the various classes. Here we use a classifier for predicting whether a patient is suffering from any heart disease or not.
+SVM is a supervised classification method that separates data using *hyperplanes*, which act as a decision boundary between the various classes. By nature, SVM suffers poor accuracy when the data does not have an explicit linear boundary. In such cases, the data may be projected into a higher dimension, and an appropriate hyperplane decision boundary fitted. 
 
 ### Model Training and Accuracy:
 
-We first train a linear classifier with the help of a *train control* method that uses *repeated cross-validation*, and then calculate prediction accuracy (77.8%) using a *confusion matrix*.
+We first train a linear kernel SVM classifier with the help of a *train control* method that uses *repeated k-fold cross-validation*, and then calculate prediction accuracy (77.8%) using a *confusion matrix*. We also normalize variables to make their scale comparable by setting the `preProcess` option in the `caret` package. By default, the SVM linear classifier that gets built is using $C = 1$.
 
 ```{r echo=FALSE, out.width="35%", out.height="35%", fig.align='center', fig.cap='SVM Accuracy with Cost = 1'}
 library(knitr)
@@ -84,7 +85,9 @@ include_graphics("./svm_accuracy.png")
 
 ### Choosing Different Costs:
 
-In order to improve model performance, we play with *Cost (C)* values in our classifier. For this we define a grid with specific *C* values. We then train our model again using the new *C* values. Our prediction accuracy is the most (84.5%) when $C = 5$, reflected in the plot below.
+In SVM, the cost function is important to control error, the margins around the decision boundary, and determines the possible misclassifications. It essentially imposes a penalty to the model for making an error - the higher the value of *C*, the less likely it is that the SVM algorithm will misclassify a point.
+
+In order to improve model performance, the tuning parameter - *Cost (C)*, is varied in our classifier. For this, we define a grid with a range of *C* values. We then train our model again using the new cost grid. The best cost value that maximizes our model accuracy to 84.5% is when $C = 0.21$ (reflected in the plot below).
 
 ```{r echo=FALSE, out.width="50%", out.height="50%", fig.align='center', fig.cap='Accuracy Plot with Varying Costs'}
 include_graphics("./svm_accuracy_plot.png")
@@ -92,7 +95,7 @@ include_graphics("./svm_accuracy_plot.png")
 
 ### Tuned Model:
 
-Finally, we test the model for the same *C* values. We do this by using *predict* over the *tuned* training model and the testing data-set, and checking the accuracy using the *confusion matrix*. We note that this ends up giving a higher accuracy rate (78.9%).
+Finally, we test the model for the same *C* values. We do this by using *predict* over the *tuned* training model and the testing data-set, and checking the accuracy using the *confusion matrix*. We note that this ends up significantly improving the accuracy rate to 84.4%.
 
 ```{r echo=FALSE, out.width="35%", out.height="35%", fig.align='center', fig.cap='Accuracy of the Tuned SVM Model'}
 include_graphics("./svm_tuned_accuracy.png")
@@ -110,41 +113,56 @@ Establishing a conditional distribution for the data at hand may be impossible. 
   \label{eqn:j1}
 \end{equation}
 
-In (\ref{eqn:j1}), $I$ is the indicator function that evaluates to 1 if the condition holds, and 0 if otherwise. Thus, (\ref{eqn:j1}) determines a frequency, which also is the conditional probability given $x_n$ for each class $j$ of the response variable. The predicted class, therefore, is $j$ such that Pr(Y=j|X=x_n) is maximum.
+In (\ref{eqn:j1}), $I$ is the indicator function that evaluates to 1 if the condition holds, and 0 if otherwise. Thus, (\ref{eqn:j1}) determines a frequency, which also is the conditional probability given $x_n$ for each class $j$ of the response variable. The predicted class, therefore, is $j$ such that $Pr(Y=j|X=x_n)$ is maximum.
 
-The KNN algorithm is applied to the normalized heart.csv data set, using an optimum value of $k=12$. The confusion matrix obtained is as shown below, and the accuracy obtained is 0.789.
-
-![Results of KNN classfication with normalize data.](KNN_norm.PNG){height=6%}
-
-As $k$ is a hyper-parameter, it must be determined a priori. Through a 5-fold cross-validation, different values of $k$ are applied and the optimal is chosen. As observed from below, the best value of $k$ is 5. This was used in the remainder of the KNN study.
-
+### Effects of Normalization
 Considering that the KNN algorithm works by finding the distance of the new data point from the $k$ nearest points, it is likely that the effect of certain parameters which are on a higher scale will become dominant over others on a lower scale. This potentially affects the accuracy of prediction. It is therefore useful that the data is normalized prior to performing KNN. In this study, the Euclidean distance was used, and normalization applied as follows. Let $X$ be the data set of parameters, and let $X_{min}$ be the $1\times p$ minimum vector of $X$. Also, let $X_{max}$ be the $1\times p$ column-wise maximum vector of $X$. Then, in this application, for each data point, $X_i$, normalization is performed according to (\ref{eqn:j2}).
 \begin{equation}
   X_{inorm}  = \frac{X_i - X_{min}}{X_{max} - X_{min}}
   \label{eqn:j2}
 \end{equation}
 
-Without normalization, the following prediction table was obtained for an optimal $k=5$. The corresponding accuracy is 0.684.
+Without normalization, the following prediction table was obtained for $k=5$. The corresponding accuracy is 0.684.
 
 ![Results of KNN prediction from unnormalized data.](KNN unormalized.PNG){height=6%}
 
-In an earlier section, the accuracy of the KNN algorithm applied to the normalized data was 0.789. Compared to the accuracy of the un-normalized data, one can see an improvement of over 15% accuracy. This underscores the need for normalization of data for especially distance-based algorithms such as the KNN.
+
+However, when applied to the normalized data set, using an optimum value of $k=12$, the confusion matrix obtained is as shown below, and the accuracy obtained is 0.789. Compared to the accuracy of the un-normalized data, one can see an improvement of over 15%. This underscores the need for normalization of data for especially distance-based algorithms such as the KNN.
+
+
+![Results of KNN classfication with normalized data.](KNN_norm.PNG){height=6%}
+
+It must be noted that $k$ is a hyper-parameter, and was determined a priori. Through a 5-fold cross-validation, different values of $k$ were applied and the optimal was chosen. The optimal value was 12 for the normalized data and 5 for the un-normalized data.
+
 
 ## Logistic Regression
-
-LR predicts whether something is *True* or *False* instead of predicting something continuous. Here, we try to predict the probability that a person will get a heart disease or not.
+Logistic regression works by first fitting a linear model to the data to obtain a continuous response. This is then categorized by taking a logit evaluation. Based on whether the final outcome is greater than 0.5 or not, a binary response is predicted. As it begins with a linear model, logistic regression lends itself to several different analysis techniques such as shrinkage, and subset selection, which determine the most important predictor variables to use in the model. 
 
 ### Pre-processing Data:
-
-For accurate predictions, we first process the raw data and convert a significant chunk of the variables into factors.
+For accurate predictions, the data was processed to convert all variables into boolean or categorical variables.
 
 ```{r echo=FALSE, out.width="40%", out.height="40%", fig.show='hold', fig.align='center', fig.cap='Raw (left) and Processed (right) Data'}
 include_graphics(c("./raw_data.png", "./processed_data.png"))
 ```
 
+We use `xtabs` to confirm that healthy and unhealthy samples come from each gender. We do the same for the `cp` parameter to verify that all 4 levels of chest pain were reported by most patients. For the resting electrocardiographic `restecg` parameter, it is interesting to note that only 4 patients represent level 1.
+
+```{r echo=FALSE, out.width="20%", out.height="20%", fig.show='hold', fig.align='center', fig.cap='Healthy and Unhealthy Samples by Gender (left), Chest Pain (Center), and Resting ECG (right)'}
+include_graphics(c("./logit_sample_dist.png", "./logit_sample_dist2.png", "./logit_sample_dist3.png"))
+```
+
 ### Comparing Models:
 
-We now compared the $R^2$, `AIC`, and `BIC` values of the two models - one with only age as the independent variable and another with all the variables. The second model is the better model since it has a higher $R^2$ and a lower `BIC`, which is an indicator of a better fit. We note that since the median age in our data-set is 55, it makes sense why it *is not* a statistically significant variable in our complex model (that covers all variables). With an `AIC` value of 225.6 (versus 396.8), the second model is again, a better fit.
+We call the `glm()` function that performs Generalized Linear Models, and start with a rather simple model where we try to predict heart disease using only the gender of each patient. This simple model is then compared to a second (complex) model with all the variables. The model that fits better is determined on the basis of $R^2$, `AIC`, and `BIC` values.
+
+***Simple model:*** 
+$\text{heart disease} = 1.0986 - 1.3022 \times \text{the patient is male}$
+
+If the patient is female, the above equation becomes, $\text{heart disease} = 1.0986 - 1.3022 \times 0$. Therefore, the `log(odds)` that a female has heart disease is 1.0986.
+
+If the patient is male, the equation for predicting heart disease becomes, $\text{heart disease} = 1.0986 - 1.3022 \times 1$. The first term in this equation represents the `log(odds)` of a female having a heart disease, the second term  represents the decrease in the `log(odds)` that a male has of having heart disease. 
+
+We construct the second model using `glm()`, and find out that it fits better since it has a higher $R^2$ and a lower `BIC` (indicator of a better fit). We note that since the median age in our data-set is 55, it makes sense why it *is not* a statistically significant variable in our complex model's (that covers all variables) `summary()`. With an `AIC` value of 225.6 (versus 396.8), the second model is again, a better fit.
 
 ```{r echo=FALSE, out.width="40%", out.height="40%", fig.show='hold', fig.align='center', fig.cap='Simple (left) and Complex (right) Models'}
 include_graphics(c("./simple_logistic_model.png", "./complex_logistic_model.png"))
@@ -152,7 +170,7 @@ include_graphics(c("./simple_logistic_model.png", "./complex_logistic_model.png"
 
 ### Predicting Probability of Heart Disease:
 
-We plot the probability of predicting whether a person in our data-set has a heart disease. The upper-right portion of the logistic curve (cyan) shows the probability a person *will* get a heart disease. The bottom-right portion of the logistic curve (light orange) shows the probability a person *will not* get a heart disease.
+We plot the probability of predicting whether a person in our data-set has a heart disease. The upper-right portion of the logistic curve (cyan) are data with a negative response (i.e., low chance of heart attack), while the bottom-right portion of the logistic curve (light orange) are data with a positive response (i.e. high chance of heart attack).
 
 ```{r echo=FALSE, out.width="60%", out.height="60%", fig.align='center', fig.cap='Predicted Heart Disease Probability'}
 include_graphics("./logistic_prediction.png")
@@ -168,20 +186,33 @@ include_graphics("./logistic_accuracy.png")
 
 \newpage
 
-# III. Analysis
+# III. Final Analysis
+
+The table below summarizes the results from the various classification algorithms. As is readily observed, the random forest algorithm performed the best for this data set, and is followed by the pruned tree. Altogether, the tree models appear to outperform the other methods. The added advantage of the tree model is its interpretability, which is a useful property to have, especially for making quick human decisions.
+
 
 **Table of prediction accuracy for each of the six methods explored**
 
 Classification Method         | Prediction Accuracy (%) |
 | :-------------------------: | :---------------------: | 
-Classification Tree           |            76.32        |   
-Classification Tree (pruned)  |            82.89        |
-Bagging                       |            78.95        |
-Support Vector Machines       |            78.90        |
+Decision Tree                 |            76.32        |   
+Pruned Decision Tree          |            82.89        |
+Bagged Tree                   |            78.95        |
+Random Forest                 |            85.53        |
+Support Vector Machines       |            84.44        |
 KNN                           |            78.90        |
 Logistic Regression           |            77.80        |
 
+While the tree models outperformed the others, it is unclear whether this is the case for data with categorical response variable. Therefore, we limit this assertion to this experiment only. 
+
+One observation from this experiment is that compared to the other models, the tree models and KNN appeared to have very little subjectivity about them. For instance, there are very few tune-able parameters in random forest. This is not so with algorithms such as logistic regression. Their dependence on a prior linear model indicates that the accuracy is heavily dependent on the type, size, and accuracy of linear model used. The same is true of SVMs, whose accuracy depends on the kernel function applied. The extensiveness of tune-able details with these other algorithms may explain why their accuracy, in this experiment, is inferior to that of the tree models; it is likely that a combination of tune-able parameters exists which may have produced better or comparable results. 
+
+Due to time constraints, our group was unable to explore other more exotic methods. For instance, some questions persist: is it possible to create a random forest of pruned trees? How about applying K-Means? Is it possible to develop a K-Means algorithm that takes into account the variance of each cluster for decision making? It would have been interesting to observe the outcome of these experiments. 
 
 # IV. Conclusion
 
+In this report, about five classification algorithms have been applied to a data set with thirteen predictor variables and a dichotomous response variable. The results show that among the applied algorithms, random forests performed the best, achieving a prediction accuracy of over 85%. While the results are promising, it remains unclear whether this superior performance of random forests on such data is generic and not limited to our choice of data set. 
+
 # V. References
+
+[1] https://archive.ics.uci.edu/ml/datasets/Heart+Disease
